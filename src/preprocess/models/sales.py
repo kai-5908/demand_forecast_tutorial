@@ -7,20 +7,20 @@ from pydantic import BaseModel
 import polars as pl
 from polars import DataFrame
 
-from .day_of_week import DAYS_OF_WEEK
-from .stores import STORES
-from .items import ITEMS
+from day_of_week import DAYS_OF_WEEK
+from stores import STORES
+from items import ITEMS
 
 
 class SalesDataSchema(patito.Model):
-    date: str = patito.Field(regex="\d{4}-\d{2}-\d{2}")
+    date: str = Field(regex="\d{4}-\d{2}-\d{2}")
     day_of_week: DAYS_OF_WEEK
-    week_of_year: str = patito.Field(ge=1, le=54)
+    week_of_year: int = Field(ge=1, le=54)
     store: STORES
     item: ITEMS
-    item_price: int = patito.Field(ge=0)
-    sales: int = patito.Field(ge=0)
-    total_sales_amount: int = patito.Field(ge=0)
+    item_price: int = Field(ge=0)
+    sales: int = Field(ge=0)
+    total_sales_amount: int = Field(ge=0)
 
 
 class SalesData(BaseModel):
@@ -28,7 +28,7 @@ class SalesData(BaseModel):
 
     @classmethod
     def from_csv(cls, path: Path) -> "SalesData":
-        sales_data = pl.read_csv(path=path)
+        sales_data = pl.read_csv(source=path)
         sales_data = sales_data
         SalesDataSchema.validate(sales_data)
         sales_data = SalesData(sales_data=sales_data)._cast_date_to_datetime()
@@ -49,8 +49,7 @@ class SalesData(BaseModel):
 
     def _cast_date_to_datetime(self) -> "SalesData":
         casted_df = self.sales_data
-        casted_date_col = self.sales_data.get_column("date").str.strptime(pl.Datetime)
-        casted_df.with_columns(casted_date_col)
+        casted_df = casted_df.with_columns(pl.col("date").str.strptime(pl.Date, format="%Y-%m-%d").cast(pl.Date))
         return SalesData(sales_data=casted_df)
 
     def _filter_by_date(
@@ -83,3 +82,6 @@ class SalesData(BaseModel):
             filtered_df = filtered_df.filter(pl.col("store") == store_name)
 
         return SalesData(sales_data=filtered_df)
+    
+    class Config:
+        arbitrary_types_allowed = True

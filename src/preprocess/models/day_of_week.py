@@ -1,4 +1,6 @@
-DAYS_OF_WEEK = [
+from typing import Literal
+
+DAYS_OF_WEEK = Literal[
     "MON",
     "TUE",
     "WED",

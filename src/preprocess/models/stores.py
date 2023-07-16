@@ -1,4 +1,6 @@
-STORES = [
+from typing import Literal
+
+STORES = Literal[
     "nagoya",
     "shinjuku",
     "osaka",

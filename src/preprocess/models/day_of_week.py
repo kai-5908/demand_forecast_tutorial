@@ -1,0 +1,9 @@
+DAYS_OF_WEEK = [
+    "MON",
+    "TUE",
+    "WED",
+    "THU",
+    "FRI",
+    "SAT",
+    "SUN",
+]
